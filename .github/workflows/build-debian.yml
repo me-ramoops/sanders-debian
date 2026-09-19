@@ -39,6 +39,7 @@ jobs:
           ./scripts/config --enable CONFIG_RMI4_F12
           ./scripts/config --enable CONFIG_USB_LIBCOMPOSITE
           ./scripts/config --enable CONFIG_USB_F_RNDIS
+          ./scripts/config --enable CONFIG_USB_CONFIGFS
           ./scripts/config --enable CONFIG_USB_CONFIGFS_RNDIS
           ./scripts/config --enable CONFIG_FB_SIMPLE
           ./scripts/config --enable CONFIG_FRAMEBUFFER_CONSOLE
@@ -72,6 +73,7 @@ jobs:
           echo sanders | sudo tee rootfs/etc/hostname >/dev/null
           printf '127.0.0.1 localhost\n127.0.1.1 sanders\n' | sudo tee rootfs/etc/hosts >/dev/null
           printf 'LABEL=debian-root / ext4 defaults 0 1\n' | sudo tee rootfs/etc/fstab >/dev/null
+          printf '[keyfile]\nunmanaged-devices=interface-name:usb0\n' | sudo tee rootfs/etc/NetworkManager/conf.d/99-usb0-unmanaged.conf >/dev/null
           HASH=$(openssl passwd -6 sanders)
           sudo sed -i "s|^root:[^:]*:|root:$HASH:|" rootfs/etc/shadow
           sudo grep -q '^root:\$6\$' rootfs/etc/shadow
