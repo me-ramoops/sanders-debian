@@ -97,8 +97,9 @@ jobs:
           echo 42:61:6e:64:65:73 > "$G/functions/rndis.usb0/dev_addr"
           echo rndis > "$G/configs/c.1/strings/0x409/configuration"
           ln -sfn "$G/functions/rndis.usb0" "$G/configs/c.1/"
-          for i in $(seq 1 30); do [ -e /sys/class/udc/7000000.dwc3 ] && break; sleep 1; done
-          echo 7000000.dwc3 > "$G/UDC"
+           for i in $(seq 1 30); do UDC=$(ls /sys/class/udc/ 2>/dev/null | head -n 1); [ -n "$UDC" ] && break; sleep 1; done
+           [ -n "$UDC" ] || { echo no-udc; exit 1; }
+           echo "$UDC" > "$G/UDC"
           ip addr add 172.16.42.1/24 dev usb0 2>/dev/null || true
           ip link set usb0 up 2>/dev/null || true
           SCRIPT
