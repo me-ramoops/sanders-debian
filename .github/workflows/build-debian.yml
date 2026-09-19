@@ -82,6 +82,7 @@ jobs:
           sudo test -f rootfs/etc/ssh/ssh_host_ed25519_key
           printf 'PermitRootLogin yes\n' | sudo tee -a rootfs/etc/ssh/sshd_config >/dev/null
           printf 'uninitialized\n' | sudo tee rootfs/etc/machine-id >/dev/null
+          printf 'wcn36xx\n' | sudo tee rootfs/etc/modules-load.d/sanders.conf >/dev/null
           sudo tee rootfs/usr/local/sbin/usb-gadget.sh >/dev/null <<'SCRIPT'
           #!/bin/sh
           set -e
