@@ -42,7 +42,7 @@ jobs:
               off += n(size) * ps
           cmd = ('console=tty0 root=LABEL=debian-root rootfstype=ext4 rw rootwait panic=10 '
                  'fsck.repair=yes lpm_levels.sleep_disabled=1 msm.prefer_mdp5=true '
-                 'clk_ignore_unused pd_ignore_unused rootdelay=5').encode()
+                 'clk_ignore_unused pd_ignore_unused rootdelay=10').encode()
           assert len(cmd) < 512, 'cmdline too long'
           hdr = struct.pack('<8s10I', b'ANDROID!', ks, ka, rs, ra, ss, sa, tags, ps, 0, 0)
           hdr += b'\x00' * 16
