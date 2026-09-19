@@ -117,6 +117,7 @@ jobs:
           WantedBy=multi-user.target
           UNIT
           sudo systemctl --root="$GITHUB_WORKSPACE/rootfs" enable ssh NetworkManager usb-gadget
+          sudo ln -sf /dev/null rootfs/etc/systemd/system/systemd-backlight@.service
 
       - name: Install kernel modules and firmware
         run: |
