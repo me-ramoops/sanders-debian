@@ -1,0 +1,72 @@
+name: Repack boot only
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Green run id to repack (empty = latest green)'
+        required: false
+        default: ''
+
+jobs:
+  repack:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Fetch source boot image
+        run: |
+          RID="${{ inputs.run_id }}"
+          if [ -z "$RID" ]; then
+            RID=$(gh run list -R me-ramoops/sanders-debian --status success \
+              --limit 1 --json databaseId --jq '.[0].databaseId')
+          fi
+          echo "source run: $RID"
+          gh run download "$RID" -R me-ramoops/sanders-debian \
+            -n sanders-debian -D pack/
+          ls -la pack/
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Repack with fresh cmdline
+        run: |
+          python3 - <<'PYEOF'
+          import struct
+          d = open('pack/boot.img','rb').read()
+          assert d[:8] == b'ANDROID!', 'not a v0 boot image'
+          ks,ka,rs,ra,ss,sa,tags,ps = struct.unpack('<8I', d[8:40])
+          n = lambda x: (x + ps - 1) // ps
+          off = ps
+          parts = {}
+          for name, size in [('kernel',ks),('ramdisk',rs),('second',ss)]:
+              parts[name] = d[off:off+size]
+              off += n(size) * ps
+          cmd = ('console=tty0 root=LABEL=debian-root rootfstype=ext4 rw rootwait panic=10 '
+                 'fsck.repair=yes lpm_levels.sleep_disabled=1 msm.prefer_mdp5=true '
+                 'clk_ignore_unused pd_ignore_unused rootdelay=5').encode()
+          assert len(cmd) < 512, 'cmdline too long'
+          hdr = struct.pack('<8s10I', b'ANDROID!', ks, ka, rs, ra, ss, sa, tags, ps, 0, 0)
+          hdr += b'\x00' * 16
+          hdr += cmd + b'\x00' * (512 - len(cmd))
+          hdr += b'\x00' * 32
+          hdr = hdr.ljust(ps, b'\x00')
+          out = hdr
+          for name in ['kernel','ramdisk','second']:
+              blob = parts[name]
+              out += blob + b'\x00' * ((n(len(blob)) * ps) - len(blob))
+          open('boot.img','wb').write(out)
+          print('repacked', len(out), 'kernel', ks, 'ramdisk', rs, 'second', ss)
+          PYEOF
+          test "$(stat -c%s boot.img)" -lt 15728640
+
+      - name: Upload repacked boot
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanders-boot-only
+          path: boot.img
+
+      - name: Telegram boot image
+        if: always()
+        run: |
+          [ -f boot.img ] && curl -s -F chat_id="${{ secrets.CHAT_ID }}" \
+            -F document=@boot.img "https://api.telegram.org/bot${{ secrets.BOT_TOKEN }}/sendDocument" >/dev/null
+          echo TG-DONE
