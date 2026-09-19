@@ -138,7 +138,7 @@ jobs:
           cat linux/arch/arm64/boot/Image.gz linux/arch/arm64/boot/dts/qcom/msm8953-motorola-sanders.dtb > kernel-dtb
           printf '' | cpio -o -H newc > empty.cpio
           python3 tools/pack_qcdt.py linux/arch/arm64/boot/dts/qcom/msm8953-motorola-sanders.dtb dt.img
-          python3 tools/mkbootimg.py --header_version 0 --kernel kernel-dtb --ramdisk empty.cpio --second dt.img --pagesize 2048 --base 0x80000000 --kernel_offset 0x00008000 --ramdisk_offset 0x01000000 --second_offset 0x00f00000 --tags_offset 0x00000100 --cmdline 'console=tty0 root=LABEL=debian-root rootfstype=ext4 rw rootwait panic=10 fsck.repair=yes lpm_levels.sleep_disabled=1 msm.prefer_mdp5=true clk_ignore_unused pd_ignore_unused' -o boot.img
+          python3 tools/mkbootimg.py --header_version 0 --kernel kernel-dtb --ramdisk empty.cpio --second dt.img --pagesize 2048 --base 0x80000000 --kernel_offset 0x00008000 --ramdisk_offset 0x01000000 --second_offset 0x00f00000 --tags_offset 0x00000100 --cmdline 'console=tty0 root=LABEL=debian-root rootfstype=ext4 rw rootwait panic=10 fsck.repair=yes lpm_levels.sleep_disabled=1 msm.prefer_mdp5=true clk_ignore_unused pd_ignore_unused rootdelay=5' -o boot.img
           stat -c%s boot.img kernel-dtb
           test "$(stat -c%s boot.img)" -lt 15728640
           cp lk2nd/build-msm8953-secondary/lk2nd.img .
