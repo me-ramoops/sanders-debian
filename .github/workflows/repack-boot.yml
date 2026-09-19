@@ -40,7 +40,7 @@ jobs:
           for name, size in [('kernel',ks),('ramdisk',rs),('second',ss)]:
               parts[name] = d[off:off+size]
               off += n(size) * ps
-          cmd = ('console=tty0 root=LABEL=debian-root rootfstype=ext4 rw rootwait panic=10 '
+          cmd = ('console=tty0 root=/dev/mmcblk0p53 rootfstype=ext4 rw rootwait panic=10 '
                  'fsck.repair=yes lpm_levels.sleep_disabled=1 msm.prefer_mdp5=true '
                  'clk_ignore_unused pd_ignore_unused rootdelay=10').encode()
           assert len(cmd) < 512, 'cmdline too long'
