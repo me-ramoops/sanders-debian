@@ -17,8 +17,8 @@ jobs:
         run: |
           RID="${{ inputs.run_id }}"
           if [ -z "$RID" ]; then
-            RID=$(gh run list -R me-ramoops/sanders-debian --status success \
-              --limit 1 --json databaseId --jq '.[0].databaseId')
+          RID=$(gh run list -R me-ramoops/sanders-debian --workflow "Build Debian ARM64 Sanders" --status success \
+            --limit 1 --json databaseId --jq '.[0].databaseId')
           fi
           echo "source run: $RID"
           gh run download "$RID" -R me-ramoops/sanders-debian \
