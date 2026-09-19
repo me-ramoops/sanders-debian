@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -yqq
-          sudo apt-get install -yqq bc bison ca-certificates clang cpio debootstrap debian-archive-keyring e2fsprogs flex git gzip kmod libssl-dev llvm lld make mkbootimg mmdebstrap qemu-user-static tar android-sdk-libsparse-utils
+          sudo apt-get install -yqq bc bison ca-certificates clang cpio debootstrap debian-archive-keyring e2fsprogs flex git gzip kmod libssl-dev llvm lld make mkbootimg mmdebstrap qemu-user-static tar
           sudo update-binfmts --enable qemu-aarch64 || true
 
       - name: Build kernel
@@ -146,8 +146,6 @@ jobs:
           sudo mkfs.ext4 -F -L debian-root -d rootfs debian-sanders-rootfs.ext4
           sudo tar --numeric-owner -czf debian-sanders-rootfs.tar.gz -C rootfs .
           sudo chown "$USER:$USER" boot.img lk2nd.img debian-sanders-rootfs.ext4 debian-sanders-rootfs.tar.gz
-          img2simg debian-sanders-rootfs.ext4 debian-sanders-system-sparse.img
-          test -f debian-sanders-system-sparse.img
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -158,7 +156,6 @@ jobs:
             lk2nd.img
             debian-sanders-rootfs.ext4
             debian-sanders-rootfs.tar.gz
-            debian-sanders-system-sparse.img
           if-no-files-found: error
 
       - name: Telegram boot files
